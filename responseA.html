@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Box Stacker Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        #gameArea {
+            position: relative;
+            width: 80%;
+            max-width: 500px;
+            height: 400px;
+            border: 2px solid #000;
+            overflow: hidden;
+        }
+        .box {
+            position: absolute;
+            background-color: #3498db;
+        }
+        #controls {
+            margin-top: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+        }
+        #score {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameArea"></div>
+<div id="controls">
+    <button id="startBtn">Start</button>
+    <button id="restartBtn" style="display:none;">Restart</button>
+</div>
+<div id="score">Score: 0</div>
+
+<script>
+    const gameArea = document.getElementById('gameArea');
+    let currentBox = null;
+    let score = 0;
+    let animationId;
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const scoreDisplay = document.getElementById('score');
+
+    function createBox() {
+        const box = document.createElement('div');
+        box.className = 'box';
+        box.style.width = `${Math.random() * 200 + 50}px`;
+        box.style.height = '30px';
+        box.style.left = '0px';
+        box.style.top = `${score * 30}px`;
+        gameArea.appendChild(box);
+        return box;
+    }
+
+    function moveBox(box) {
+        let pos = 0;
+        const width = gameArea.offsetWidth;
+        function frame() {
+            if (pos > width) {
+                pos = -parseFloat(box.style.width);
+            }
+            box.style.left = pos + 'px';
+            pos += 2; // Speed of box movement
+            animationId = requestAnimationFrame(frame);
+        }
+        frame();
+    }
+
+    function stopBox(newBox, previousBox) {
+        cancelAnimationFrame(animationId);
+        const overlap = calculateOverlap(newBox, previousBox);
+        if (overlap) {
+            newBox.style.width = overlap + 'px';
+            if (overlap > 0) score++;
+            else endGame();
+        } else {
+            endGame();
+        }
+        scoreDisplay.textContent = `Score: ${score}`;
+    }
+
+    function calculateOverlap(newBox, prevBox) {
+        const newRect = newBox.getBoundingClientRect();
+        const prevRect = prevBox.getBoundingClientRect();
+        const overlap = Math.min(newRect.right, prevRect.right) - Math.max(newRect.left, prevRect.left);
+        return overlap > 0 ? overlap : 0;
+    }
+
+    function endGame() {
+        alert('Game Over! Your score is ' + score);
+        restartBtn.style.display = 'inline';
+    }
+
+    startBtn.onclick = function() {
+        currentBox = createBox();
+        moveBox(currentBox);
+        this.style.display = 'none';
+    };
+
+    gameArea.onclick = function() {
+        if (currentBox) {
+            stopBox(currentBox, score > 0 ? gameArea.lastChild : {getBoundingClientRect: () => ({left: 0, right: gameArea.offsetWidth})});
+            if (score > 0) currentBox = createBox();
+        }
+    };
+
+    restartBtn.onclick = function() {
+        gameArea.innerHTML = '';
+        score = 0;
+        scoreDisplay.textContent = 'Score: 0';
+        this.style.display = 'none';
+        startBtn.style.display = 'inline';
+    };
+</script>
+
+</body>
+</html>

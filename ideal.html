@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Div Slide Game</title>
+    <link rel="icon" href="fav.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --width: 400px;
+      }
+      * {
+        padding: 0;
+        margin: 0;
+        outline: none;
+      }
+      .game {
+        width: 500px;
+        height: 500px;
+        margin: auto;
+        border: 1px solid black;
+      }
+      button {
+        font-size: 2rem;
+        padding: 0.5rem 2rem;
+        border: 3px solid black;
+        border-radius: 0.3rem;
+        margin: 1rem auto;
+        display: block;
+      }
+      #btn {
+        background-color: lightgreen;
+      }
+      #btn:hover,
+      #restart:hover {
+        background-color: yellow;
+      }
+      #btn:active,
+      #restart:active {
+        background-color: red;
+      }
+      #restart {
+        background-color: orange;
+        display: none;
+      }
+      .slider {
+        visibility: hidden;
+        background-color: red;
+        height: 20px;
+        width: 100px;
+        position: relative;
+      }
+      .slider1 {
+        visibility: visible;
+      }
+      .animate {
+        animation: side 4s infinite linear;
+      }
+      @keyframes side {
+        0% {
+          left: 0px;
+        }
+        50% {
+          left: var(--width);
+        }
+        100% {
+          left: 0px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game">
+      <div class="slider slider25 animate" id="slider25"></div>
+      <div class="slider slider24 animate" id="slider24"></div>
+      <div class="slider slider23 animate" id="slider23"></div>
+      <div class="slider slider22 animate" id="slider22"></div>
+      <div class="slider slider21 animate" id="slider21"></div>
+      <div class="slider slider20 animate" id="slider20"></div>
+      <div class="slider slider19 animate" id="slider19"></div>
+      <div class="slider slider18 animate" id="slider18"></div>
+      <div class="slider slider17 animate" id="slider17"></div>
+      <div class="slider slider16 animate" id="slider16"></div>
+      <div class="slider slider15 animate" id="slider15"></div>
+      <div class="slider slider14 animate" id="slider14"></div>
+      <div class="slider slider13 animate" id="slider13"></div>
+      <div class="slider slider12 animate" id="slider12"></div>
+      <div class="slider slider11 animate" id="slider11"></div>
+      <div class="slider slider10 animate" id="slider10"></div>
+      <div class="slider slider9 animate" id="slider9"></div>
+      <div class="slider slider8 animate" id="slider8"></div>
+      <div class="slider slider7 animate" id="slider7"></div>
+      <div class="slider slider6 animate" id="slider6"></div>
+      <div class="slider slider5 animate" id="slider5"></div>
+      <div class="slider slider4 animate" id="slider4"></div>
+      <div class="slider slider3 animate" id="slider3"></div>
+      <div class="slider slider2 animate" id="slider2"></div>
+      <div class="slider slider1 animate" id="slider1"></div>
+    </div>
+    <button onclick="stopSliding('slider1','slider2','slider1')" id="btn">
+      Stop!
+    </button>
+    <button id="restart" onclick="location.reload();">Restart</button>
+  </body>
+  <script>
+    var gameWidth = 400;
+    var counter = 2;
+    function stopSliding(slider1, slider2, sliderB4) {
+      var btn = document.getElementById("btn");
+      var slider1 = document.getElementById(slider1);
+      var slider2 = document.getElementById(slider2);
+      var sliderB4 = document.getElementById(sliderB4);
+      var left = window.getComputedStyle(slider1).getPropertyValue("left");
+      slider1.classList.remove("animate");
+      slider1.style.left = left;
+
+      var width = parseFloat(
+        window.getComputedStyle(slider1).getPropertyValue("width")
+      );
+      var left1 = parseFloat(
+        window.getComputedStyle(slider1).getPropertyValue("left")
+      );
+      var left2 = parseFloat(
+        window.getComputedStyle(sliderB4).getPropertyValue("left")
+      );
+      var difference = left1 - left2;
+      var absDifference = Math.abs(left1 - left2);
+      if (difference > width || difference < -width) {
+        document.getElementById("restart").style.display = "block";
+        var scoreStr = "Score:";
+        var scoreMinusOne = counter - 2;
+        var score = scoreStr.concat(scoreMinusOne);
+        btn.setAttribute("onclick", "");
+        alert(score);
+        Location.reload();
+      }
+      var offset = width - absDifference;
+      var px = "px";
+      var offstring = offset.toString();
+      var theWidth = offstring.concat(px);
+
+      var str1 = "stopSliding('slider";
+      var str2 = counter;
+      var str3 = "','slider";
+      var str4 = counter + 1;
+      var str5 = "','slider";
+      var str6 = counter - 1;
+      var str7 = "')";
+      var str8 = str1.concat(str2, str3, str4, str5, str6, str7);
+      btn.setAttribute("onclick", str8);
+      if (difference > 0) {
+        var newleft = left1 + absDifference;
+      } else {
+        var newleft = left1 - difference;
+      }
+      var theleft = newleft.toString();
+      var newnewleft = theleft.concat(px);
+      slider1.style.width = theWidth;
+      if (difference < 0) {
+        slider1.style.left = newnewleft;
+      }
+      slider2.style.width = theWidth;
+      slider2.style.visibility = "visible";
+      gameWidth = gameWidth + absDifference;
+      document.documentElement.style.setProperty("--width", gameWidth + "px");
+      counter++;
+    }
+  </script>
+</html>

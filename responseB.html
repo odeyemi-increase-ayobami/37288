@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stack Slider Game</title>
+<style>
+body {
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.game-container {
+    text-align: center;
+    width: 80%;
+    max-width: 500px;
+    position: relative;
+}
+
+#slider {
+    width: 200px;
+    height: 50px;
+    background-color: #ff6347;
+    position: absolute;
+    left: 0;
+    transition: left 4s linear;
+}
+
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+#score, #gameOver {
+    margin-top: 20px;
+    font-size: 1.2em;
+}
+
+#inputBox {
+    margin-bottom: 20px;
+    padding: 10px;
+}
+
+#restartBtn {
+    display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="game-container">
+    <input type="text" id="inputBox" placeholder="Enter your name">
+    <div id="slider"></div>
+    <button id="startBtn">Start</button>
+    <button id="stopBtn">Stop</button>
+    <button id="restartBtn">Restart</button>
+    <div id="score">Score: 0</div>
+    <div id="gameOver" style="display:none;">Game Over!</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const slider = document.getElementById('slider');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const scoreDisplay = document.getElementById('score');
+    const gameOverDisplay = document.getElementById('gameOver');
+    let score = 0;
+    let isGameRunning = false;
+    let sliderInterval;
+    let currentWidth = 200;
+    let currentTop = 0;
+
+    function startGame() {
+        if (!isGameRunning) {
+            isGameRunning = true;
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'inline';
+            slider.style.left = '0px';
+            slider.style.width = `${currentWidth}px`;
+            slider.style.top = `${currentTop}px`;
+            sliderInterval = setInterval(() => {
+                let left = parseFloat(slider.style.left) || 0;
+                if (left + currentWidth >= window.innerWidth * 0.8) {
+                    slider.style.left = '0px';
+                } else {
+                    slider.style.left = `${left + 1}px`;
+                }
+            }, 10);
+        }
+    }
+
+    function stopGame() {
+        clearInterval(sliderInterval);
+        const prevBox = {width: currentWidth, top: currentTop, left: parseFloat(slider.style.left)};
+        const overlap = Math.min(prevBox.left + prevBox.width, parseFloat(slider.style.left) + currentWidth) - Math.max(prevBox.left, parseFloat(slider.style.left));
+        
+        if (overlap > 0) {
+            currentWidth = overlap;
+            currentTop += 50;
+            score++;
+            scoreDisplay.textContent = `Score: ${score}`;
+            slider.style.width = `${currentWidth}px`;
+            slider.style.top = `${currentTop}px`;
+        } else {
+            gameOver();
+        }
+    }
+
+    function gameOver() {
+        isGameRunning = false;
+        clearInterval(sliderInterval);
+        gameOverDisplay.style.display = 'block';
+        stopBtn.style.display = 'none';
+        restartBtn.style.display = 'inline';
+    }
+
+    function restartGame() {
+        score = 0;
+        currentWidth = 200;
+        currentTop = 0;
+        scoreDisplay.textContent = `Score: ${score}`;
+        gameOverDisplay.style.display = 'none';
+        restartBtn.style.display = 'none';
+        startBtn.style.display = 'inline';
+        slider.style.width = `${currentWidth}px`;
+        slider.style.top = `${currentTop}px`;
+    }
+
+    startBtn.addEventListener('click', startGame);
+    stopBtn.addEventListener('click', stopGame);
+    restartBtn.addEventListener('click', restartGame);
+});
+</script>
+
+</body>
+</html>
