@@ -1,145 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stack Slider Game</title>
-<style>
-body {
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    font-family: Arial, sans-serif;
-}
-
-.game-container {
-    text-align: center;
-    width: 80%;
-    max-width: 500px;
-    position: relative;
-}
-
-#slider {
-    width: 200px;
-    height: 50px;
-    background-color: #ff6347;
-    position: absolute;
-    left: 0;
-    transition: left 4s linear;
-}
-
-button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 1em;
-    cursor: pointer;
-}
-
-#score, #gameOver {
-    margin-top: 20px;
-    font-size: 1.2em;
-}
-
-#inputBox {
-    margin-bottom: 20px;
-    padding: 10px;
-}
-
-#restartBtn {
-    display: none;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stacking Game</title>
+    <style>
+        body { 
+            background: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            font-family: Arial, sans-serif; 
+        }
+        #gameArea {
+            border: 2px solid black;
+            width: 80%;
+            max-width: 500px;
+            height: 60vh;
+            position: relative;
+            overflow: hidden;
+        }
+        .box {
+            position: absolute;
+            background-color: #ff6347;
+            width: 100px;
+            height: 20px;
+            bottom: 0;
+        }
+        #buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #score {
+            text-align: center;
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        @keyframes slide {
+            from { left: 0; }
+            to { left: calc(100% - 100px); }
+        }
+    </style>
 </head>
 <body>
+    <div id="gameContainer">
+        <div id="gameArea">
+            <div class="box" id="movingBox"></div>
+        </div>
+        <div id="buttons">
+            <button id="startBtn">Start</button>
+            <button id="restartBtn" style="display:none;">Restart</button>
+        </div>
+        <div id="score">Score: 0</div>
+    </div>
 
-<div class="game-container">
-    <input type="text" id="inputBox" placeholder="Enter your name">
-    <div id="slider"></div>
-    <button id="startBtn">Start</button>
-    <button id="stopBtn">Stop</button>
-    <button id="restartBtn">Restart</button>
-    <div id="score">Score: 0</div>
-    <div id="gameOver" style="display:none;">Game Over!</div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const slider = document.getElementById('slider');
+    <script>
+    const gameArea = document.getElementById('gameArea');
+    const movingBox = document.getElementById('movingBox');
     const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
     const restartBtn = document.getElementById('restartBtn');
     const scoreDisplay = document.getElementById('score');
-    const gameOverDisplay = document.getElementById('gameOver');
+    
+    let animationId;
     let score = 0;
-    let isGameRunning = false;
-    let sliderInterval;
-    let currentWidth = 200;
-    let currentTop = 0;
+    let boxes = [];
 
     function startGame() {
-        if (!isGameRunning) {
-            isGameRunning = true;
-            startBtn.style.display = 'none';
-            stopBtn.style.display = 'inline';
-            slider.style.left = '0px';
-            slider.style.width = `${currentWidth}px`;
-            slider.style.top = `${currentTop}px`;
-            sliderInterval = setInterval(() => {
-                let left = parseFloat(slider.style.left) || 0;
-                if (left + currentWidth >= window.innerWidth * 0.8) {
-                    slider.style.left = '0px';
-                } else {
-                    slider.style.left = `${left + 1}px`;
-                }
-            }, 10);
-        }
+        startBtn.style.display = 'none';
+        restartBtn.style.display = 'none';
+        score = 0;
+        scoreDisplay.textContent = 'Score: ' + score;
+        boxes = [];
+        animateBox();
     }
 
-    function stopGame() {
-        clearInterval(sliderInterval);
-        const prevBox = {width: currentWidth, top: currentTop, left: parseFloat(slider.style.left)};
-        const overlap = Math.min(prevBox.left + prevBox.width, parseFloat(slider.style.left) + currentWidth) - Math.max(prevBox.left, parseFloat(slider.style.left));
+    function animateBox() {
+        movingBox.style.animation = 'slide 4s linear infinite alternate';
+        animationId = requestAnimationFrame(checkPosition);
+    }
+
+    function stopBox() {
+        cancelAnimationFrame(animationId);
+        movingBox.style.animation = '';
+        const rect = movingBox.getBoundingClientRect();
+        const lastBox = boxes[boxes.length - 1];
         
-        if (overlap > 0) {
-            currentWidth = overlap;
-            currentTop += 50;
-            score++;
-            scoreDisplay.textContent = `Score: ${score}`;
-            slider.style.width = `${currentWidth}px`;
-            slider.style.top = `${currentTop}px`;
-        } else {
-            gameOver();
+        if (lastBox) {
+            const lastRect = lastBox.getBoundingClientRect();
+            const overlap = rect.right > lastRect.left && rect.left < lastRect.right;
+            if (overlap) {
+                // Trim the box to fit over the last box
+                const newWidth = Math.min(rect.right, lastRect.right) - Math.max(rect.left, lastRect.left);
+                movingBox.style.width = `${newWidth}px`;
+                movingBox.style.left = `${Math.max(rect.left, lastRect.left)}px`;
+                score++;
+            } else {
+                gameOver();
+                return;
+            }
         }
+        
+        boxes.push(movingBox.cloneNode(true));
+        movingBox.style.bottom = `${20 * (score + 1)}px`; // Adjust for new box height
+        scoreDisplay.textContent = 'Score: ' + score;
+        if (score > 0) restartBtn.style.display = 'inline';
     }
 
     function gameOver() {
-        isGameRunning = false;
-        clearInterval(sliderInterval);
-        gameOverDisplay.style.display = 'block';
-        stopBtn.style.display = 'none';
+        alert('Game Over! Your score is: ' + score);
         restartBtn.style.display = 'inline';
-    }
-
-    function restartGame() {
-        score = 0;
-        currentWidth = 200;
-        currentTop = 0;
-        scoreDisplay.textContent = `Score: ${score}`;
-        gameOverDisplay.style.display = 'none';
-        restartBtn.style.display = 'none';
         startBtn.style.display = 'inline';
-        slider.style.width = `${currentWidth}px`;
-        slider.style.top = `${currentTop}px`;
     }
 
-    startBtn.addEventListener('click', startGame);
-    stopBtn.addEventListener('click', stopGame);
-    restartBtn.addEventListener('click', restartGame);
-});
-</script>
+    function checkPosition() {
+        if (movingBox.getBoundingClientRect().right >= gameArea.offsetWidth || movingBox.getBoundingClientRect().left <= 0) {
+            stopBox();
+        }
+        animationId = requestAnimationFrame(checkPosition);
+    }
 
+    startBtn.onclick = startGame;
+    restartBtn.onclick = startGame;
+    document.getElementById('gameArea').onclick = stopBox;
+    </script>
 </body>
 </html>
