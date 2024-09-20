@@ -3,9 +3,110 @@
   <head>
     <meta charset="UTF-8" />
     <title>Div Slide Game</title>
-    <link rel="icon" href="fav.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+      :root {
+        --slider-color: #ff4757;
+        --background-color: #f8f9fa;
+        --button-bg: #2ed573;
+        --button-hover-bg: #1e90ff;
+        --button-active-bg: #ff6b81;
+        --restart-bg: #ffa502;
+        --restart-hover-bg: #e67e22;
+        --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: var(--background-color);
+        font-family: var(--font-family);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+
+      .game {
+        width: 500px;
+        height: 500px;
+        border: 2px solid #333;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+
+      button {
+        font-size: 1.5rem;
+        padding: 0.5rem 2rem;
+        border: none;
+        border-radius: 5px;
+        margin: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+        font-weight: bold;
+      }
+
+      #btn {
+        background-color: var(--button-bg);
+        color: white;
+      }
+
+      #btn:hover {
+        background-color: var(--button-hover-bg);
+      }
+
+      #btn:active {
+        background-color: var(--button-active-bg);
+        transform: scale(0.95);
+      }
+
+      #restart {
+        background-color: var(--restart-bg);
+        color: white;
+        display: none;
+      }
+
+      #restart:hover {
+        background-color: var(--restart-hover-bg);
+      }
+
+      .slider {
+        visibility: hidden;
+        background-color: var(--slider-color);
+        height: 20px;
+        width: 100px;
+        position: absolute;
+        transition: left 0.3s ease;
+        border-radius: 5px;
+      }
+
+      .slider1 {
+        visibility: visible;
+      }
+
+      .animate {
+        animation: side 4s infinite linear;
+      }
+
+      @keyframes side {
+        0% {
+          left: 0px;
+        }
+        50% {
+          left: var(--width);
+        }
+        100% {
+          left: 0px;
+        }
+      }
       :root {
         --width: 400px;
       }
@@ -100,7 +201,7 @@
     <button onclick="stopSliding('slider1','slider2','slider1')" id="btn">
       Stop!
     </button>
-    <button id="restart" onclick="location.reload();">Restart</button>
+    <button id="restart" onclick="restartGame()">Restart</button>
   </body>
   <script>
     var gameWidth = 400;
@@ -132,7 +233,7 @@
         var score = scoreStr.concat(scoreMinusOne);
         btn.setAttribute("onclick", "");
         alert(score);
-        Location.reload();
+        restartGame();
       }
       var offset = width - absDifference;
       var px = "px";
@@ -165,5 +266,12 @@
       document.documentElement.style.setProperty("--width", gameWidth + "px");
       counter++;
     }
+
+    function restartGame() {
+      // Reset the game by reloading the page
+      location.reload();
+    }
+
+   
   </script>
 </html>
