@@ -53,31 +53,7 @@
         transition: background-color 0.3s, transform 0.2s;
         font-weight: bold;
       }
-
-      #btn {
-        background-color: var(--button-bg);
-        color: white;
-      }
-
-      #btn:hover {
-        background-color: var(--button-hover-bg);
-      }
-
-      #btn:active {
-        background-color: var(--button-active-bg);
-        transform: scale(0.95);
-      }
-
-      #restart {
-        background-color: var(--restart-bg);
-        color: white;
-        display: none;
-      }
-
-      #restart:hover {
-        background-color: var(--restart-hover-bg);
-      }
-
+    
       .slider {
         visibility: hidden;
         background-color: var(--slider-color);
@@ -168,7 +144,10 @@
           left: 0px;
         }
       }
+
+      
     </style>
+    
   </head>
   <body>
     <div class="game">
@@ -206,7 +185,11 @@
   <script>
     var gameWidth = 400;
     var counter = 2;
+    var gameOver = false; // New variable to track game over state
+
     function stopSliding(slider1, slider2, sliderB4) {
+      if (gameOver) return; // Prevent further actions after game over
+
       var btn = document.getElementById("btn");
       var slider1 = document.getElementById(slider1);
       var slider2 = document.getElementById(slider2);
@@ -226,52 +209,46 @@
       );
       var difference = left1 - left2;
       var absDifference = Math.abs(left1 - left2);
-      if (difference > width || difference < -width) {
+
+      if (absDifference > width) {
+        // Player loses
         document.getElementById("restart").style.display = "block";
-        var scoreStr = "Score:";
-        var scoreMinusOne = counter - 2;
-        var score = scoreStr.concat(scoreMinusOne);
-        btn.setAttribute("onclick", "");
-        alert(score);
-        restartGame();
+        var scoreStr = "Score: ";
+        var score = counter - 2;
+        alert(scoreStr + score);
+
+        btn.setAttribute("onclick", ""); // Disable the Stop button
+        gameOver = true; // Set the game over state
+        return;
       }
+
       var offset = width - absDifference;
       var px = "px";
-      var offstring = offset.toString();
-      var theWidth = offstring.concat(px);
+      var theWidth = offset.toString() + px;
 
-      var str1 = "stopSliding('slider";
-      var str2 = counter;
-      var str3 = "','slider";
-      var str4 = counter + 1;
-      var str5 = "','slider";
-      var str6 = counter - 1;
-      var str7 = "')";
-      var str8 = str1.concat(str2, str3, str4, str5, str6, str7);
-      btn.setAttribute("onclick", str8);
+      var newOnClick = `stopSliding('slider${counter}', 'slider${
+        counter + 1
+      }', 'slider${counter - 1}')`;
+      btn.setAttribute("onclick", newOnClick);
+
       if (difference > 0) {
         var newleft = left1 + absDifference;
       } else {
         var newleft = left1 - difference;
       }
-      var theleft = newleft.toString();
-      var newnewleft = theleft.concat(px);
+
       slider1.style.width = theWidth;
-      if (difference < 0) {
-        slider1.style.left = newnewleft;
-      }
       slider2.style.width = theWidth;
       slider2.style.visibility = "visible";
-      gameWidth = gameWidth + absDifference;
+
+      gameWidth += absDifference;
       document.documentElement.style.setProperty("--width", gameWidth + "px");
+
       counter++;
     }
 
     function restartGame() {
-      // Reset the game by reloading the page
-      location.reload();
+      location.reload(); // Reload the page to reset the game
     }
-
-   
   </script>
 </html>
